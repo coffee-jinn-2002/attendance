@@ -14,6 +14,15 @@
 <div>
     <p>{{user.organization_name}}</p>
 </div>
+
+{% if user.is_admin %}
+<!-- 管理者の場合の表示 -->
+<p>You are an administrator.</p>
+{% else %}
+<!-- 管理者でない場合の表示 -->
+<p>You are not an administrator.</p>
+{% endif %}
+
 <!-- ↓追加 -->
 <!-- <a href="{% url 'attendance_app:logout' %}" class="btn btn-primary">Logout</a>  -->
 <form action="{% url 'attendance_app:logout' %}" method="post">
