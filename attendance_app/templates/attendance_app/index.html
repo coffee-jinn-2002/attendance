@@ -11,6 +11,9 @@
 {% block content %}
 {% if user.is_authenticated %}
 <div class="h2">Welcome {{ user.username }}</div>
+<div>
+    <p>{{user.organization_name}}</p>
+</div>
 <!-- ↓追加 -->
 <!-- <a href="{% url 'attendance_app:logout' %}" class="btn btn-primary">Logout</a>  -->
 <form action="{% url 'attendance_app:logout' %}" method="post">

@@ -9,6 +9,7 @@ class SignUpForm(UserCreationForm):
         fields = (
             "username",
             "email",
+            "organization_name",
         )
 
 # ログインフォームを追加
