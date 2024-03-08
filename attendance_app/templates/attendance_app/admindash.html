@@ -1,0 +1,34 @@
+{% extends 'attendance_app/base.html' %}
+
+{% block title %}
+{% if user.is_authenticated %}
+<div class="h1">Admin Page</div>
+{% else %}
+<div class="h1">Main</div>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+{% if user.is_authenticated %}
+<div class="h2">Welcome {{ user.username }}</div>
+<div>
+    <p>{{user.organization_name}}</p>
+</div>
+
+{% if user.is_admin %}
+<!-- 管理者の場合の表示 -->
+<p>You are an administrator.</p>
+{% else %}
+<!-- 管理者でない場合の表示 -->
+<p>You are not an administrator.</p>
+{% endif %}
+
+<form action="{% url 'attendance_app:logout' %}" method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-primary">Logout</button>
+</form>
+{% else %}
+<a href="{% url 'attendance_app:signup' %}" class="btn btn-primary">Signup</a>
+<a href="{% url 'attendance_app:login' %}" class="btn btn-primary">Login</a>
+{% endif %}
+{% endblock %}
