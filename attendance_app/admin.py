@@ -1,9 +1,18 @@
 from django.contrib import admin
-from django.contrib.auth.models import Group
+from .models import User, Attendance, Workday
 
-from .models import User
+class AttendanceInline(admin.TabularInline):
+    model = Attendance
 
-# Register your models here.
-admin.site.register(User)  # Userモデルを登録
-# admin.site.register(User, UserAdmin)  # Userモデルを登録
-admin.site.unregister(Group)  # Groupモデルは不要のため非表示にします
+class WorkdayInline(admin.TabularInline):
+    model = Workday
+
+class UserAdmin(admin.ModelAdmin):
+    inlines = [
+        AttendanceInline,
+        WorkdayInline,
+    ]
+
+admin.site.register(User, UserAdmin)
+admin.site.register(Attendance)
+admin.site.register(Workday)

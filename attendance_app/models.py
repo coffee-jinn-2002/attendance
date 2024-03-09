@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import (BaseUserManager, AbstractBaseUser, PermissionsMixin)
 from django.utils.translation import gettext_lazy as _
+from django.conf import settings
+from django.utils import timezone
 
 class UserManager(BaseUserManager):
     def create_user(self, username, email, password=None, organization_name=None, **extra_fields):
@@ -55,3 +57,42 @@ class Organization(models.Model):
 
     def __str__(self):
         return self.name
+
+
+# 勤怠関連
+class Attendance(models.Model):
+    STATUS_CHOICES = (
+        ('出勤前', '出勤前'),
+        ('出勤中', '出勤中'),
+        ('休憩中', '休憩中'),
+        ('退勤済み', '退勤済み'),
+    )
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='出勤前')
+    start_time = models.DateTimeField(blank=True, null=True)
+    end_time = models.DateTimeField(blank=True, null=True)
+    total_work_time = models.DurationField(blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        if self.start_time and self.end_time:
+            self.total_work_time = self.end_time - self.start_time
+        super().save(*args, **kwargs)
+
+class Break(models.Model):
+    attendance = models.ForeignKey(Attendance, on_delete=models.CASCADE)
+    start_time = models.DateTimeField(default=timezone.now)
+    end_time = models.DateTimeField(blank=True, null=True)
+
+class Workday(models.Model):
+    attendance = models.OneToOneField(Attendance, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,default=1)
+    date = models.DateField(default=timezone.now)
+    start_time = models.DateTimeField(blank=True, null=True)
+    end_time = models.DateTimeField(blank=True, null=True)
+    break_start_time = models.DateTimeField(blank=True, null=True)
+    break_end_time = models.DateTimeField(blank=True, null=True)
+    total_work_time = models.DurationField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.user.username}'s workday on {self.date}"

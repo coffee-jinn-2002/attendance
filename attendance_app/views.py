@@ -8,8 +8,11 @@ from django.views.generic import TemplateView, CreateView
 from django.contrib.auth.views import LoginView as BaseLoginView,  LogoutView as BaseLogoutView
 from django.urls import reverse_lazy
 from .forms import SignUpForm, LoginFrom, CreateUserForm
-from .models import User
 from django.views.generic import FormView
+from .models import User, Attendance
+# from .forms import AttendanceForm
+from django.utils import timezone
+import datetime
 
 # Create your views here.
 
@@ -55,9 +58,15 @@ class LogoutView(BaseLogoutView):
 class AdminDashboardView(LoginRequiredMixin, TemplateView):
     template_name = 'attendance_app/admindash.html'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # ログイン中のユーザーの組織名を取得
+        organization_name = self.request.user.organization_name
+        # 組織名に基づいてユーザーをフィルタリングして取得
+        users = User.objects.filter(organization_name=organization_name)
+        context['users'] = users
+        return context
 
-class UserDashboardView(LoginRequiredMixin, TemplateView):
-    template_name = 'attendance_app/userdash.html'
 
 
 class CreateUserView(FormView):
@@ -72,3 +81,45 @@ class CreateUserView(FormView):
         # create_staffメソッドを使用して新しいユーザーを作成
         User.objects.create_staff(username=username, email=email, password=password, organization_name=organization_name)
         return redirect('attendance_app:admin_dashboard')
+    
+# 勤怠機能
+class UserDashboardView(LoginRequiredMixin, TemplateView):
+    template_name = 'attendance_app/userdash.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        try:
+            attendance = Attendance.objects.get(user=user)
+        except Attendance.DoesNotExist:
+            # 関連する Attendance オブジェクトが存在しない場合は新しいオブジェクトを作成
+            attendance = Attendance.objects.create(user=user, status='出勤前')
+        context['attendance'] = attendance
+        # 現在時刻をテンプレートに渡す
+        context['current_date'] = datetime.date.today().strftime('%Y年%m月%d日')
+        context['current_time'] = timezone.localtime(timezone.now()).strftime('%H:%M:%S')
+        return context
+
+    def post(self, request, *args, **kwargs):
+        user = self.request.user
+        action = request.POST.get('action')
+        attendance = Attendance.objects.filter(user=user).latest('id')
+        
+        if action == 'start':
+            attendance.start_time = timezone.now()
+            attendance.status = '出勤中'
+            attendance.save()
+        elif action == 'break_start':
+            attendance.break_start_time = timezone.now()
+            attendance.status = '休憩中'
+            attendance.save()
+        elif action == 'break_end':
+            attendance.break_end_time = timezone.now()
+            attendance.status = '出勤中'
+            attendance.save()
+        elif action == 'end':
+            attendance.end_time = timezone.now()
+            attendance.status = '退勤済み'
+            attendance.save()
+        
+        return redirect('attendance_app:user_dashboard')
