@@ -65,8 +65,9 @@ setInterval(updateCurrentTime, 1000);
     {% csrf_token %}
     <button type="submit" name="action" value="break_end" class="btn btn-primary">休憩終了</button>
 </form>
+{% elif attendance.status == '退勤済み' %}
+<div class="h2">実働時間: {{ attendance.total_work_time }}</div>
 {% endif %}
-
 <p></p>
 <form action="{% url 'attendance_app:logout' %}" method="post">
     {% csrf_token %}
