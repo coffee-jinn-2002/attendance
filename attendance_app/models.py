@@ -29,7 +29,7 @@ class UserManager(BaseUserManager):
 
     def create_staff(self, username, email, password=None, organization_name=None, **extra_fields):
         extra_fields.setdefault('is_admin', False)
-        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_staff', False)
         return self.create_user(username, email, password, organization_name, **extra_fields)
 
 class User(AbstractBaseUser, PermissionsMixin):

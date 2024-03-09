@@ -7,7 +7,9 @@ from django.contrib.auth import login, authenticate
 from django.views.generic import TemplateView, CreateView
 from django.contrib.auth.views import LoginView as BaseLoginView,  LogoutView as BaseLogoutView
 from django.urls import reverse_lazy
-from .forms import SignUpForm, LoginFrom
+from .forms import SignUpForm, LoginFrom, CreateUserForm
+from .models import User
+from django.views.generic import FormView
 
 # Create your views here.
 
@@ -56,3 +58,17 @@ class AdminDashboardView(LoginRequiredMixin, TemplateView):
 
 class UserDashboardView(LoginRequiredMixin, TemplateView):
     template_name = 'attendance_app/userdash.html'
+
+
+class CreateUserView(FormView):
+    template_name = 'attendance_app/create_user.html'
+    form_class = CreateUserForm
+
+    def form_valid(self, form):
+        username = form.cleaned_data['username']
+        password = form.cleaned_data['password']
+        email = form.cleaned_data['email']
+        organization_name = self.request.user.organization_name
+        # create_staffメソッドを使用して新しいユーザーを作成
+        User.objects.create_staff(username=username, email=email, password=password, organization_name=organization_name)
+        return redirect('attendance_app:admin_dashboard')

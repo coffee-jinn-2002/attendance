@@ -15,13 +15,13 @@
     <p>{{user.organization_name}}</p>
 </div>
 
-{% if user.is_admin %}
-<!-- 管理者の場合の表示 -->
 <p>You are an administrator.</p>
-{% else %}
-<!-- 管理者でない場合の表示 -->
-<p>You are not an administrator.</p>
-{% endif %}
+
+
+
+<a href="{% url 'attendance_app:create_user' %}" class="btn btn-primary">Create New User</a>
+
+<p></p>
 
 <form action="{% url 'attendance_app:logout' %}" method="post">
     {% csrf_token %}
