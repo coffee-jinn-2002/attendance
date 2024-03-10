@@ -89,47 +89,28 @@ class UserDashboardView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # ログイン中のユーザーを取得
         user = self.request.user
-        try:
-            # ユーザーに関連付けられた最新のWorkdayを取得
-            workday = user.workday_set.latest('date')
-        except Workday.DoesNotExist:
-            # 関連する Workday オブジェクトが存在しない場合は新しいオブジェクトを作成
-            workday = Workday.objects.create(user=user, date=datetime.date.today())
-        
-        try:
-            # Workdayに関連付けられたAttendanceを取得
-            attendance = workday.attendance
-        except Attendance.DoesNotExist:
-            # 関連する Attendance オブジェクトが存在しない場合は新しいオブジェクトを作成
-            attendance = Attendance.objects.create(workday=workday, status='出勤前')
-            
+        current_date = timezone.localdate()  # 現在の日付を取得
+
+        # ユーザーに関連付けられた最新のWorkdayを取得または作成
+        workday, created = Workday.objects.get_or_create(
+            user=user,
+            date=current_date,
+            defaults={'start_time': None, 'end_time': None}
+        )
+
+        # Workdayに関連付けられたAttendanceを取得または作成
+        attendance, created = Attendance.objects.get_or_create(
+            workday=workday,
+            defaults={'status': '出勤前', 'start_time': None, 'end_time': None}
+        )
+
+        context['workday'] = workday
         context['attendance'] = attendance
-
-        # 実働時間を計算する
-        total_work_time = attendance.total_work_time if attendance.total_work_time else datetime.timedelta(0)
-        breaks = Break.objects.filter(workday=workday)
-        for break_instance in breaks:
-            if break_instance.end_time:
-                total_work_time -= break_instance.end_time - break_instance.start_time
-        context['total_work_time'] = total_work_time
-
-        # 休憩開始ボタンを表示する条件を追加
-        context['can_start_break'] = attendance.status == '出勤中'
-
-        # 日付が変わったら出勤ボタンを押せるようにする
-        current_date = datetime.date.today()
-        if not workday.date == current_date:
-            context['can_start_work'] = True
-        else:
-            context['can_start_work'] = False
-
-        # 現在時刻をテンプレートに渡す
-        context['current_date'] = datetime.date.today().strftime('%Y年%m月%d日')
-        context['current_time'] = timezone.localtime(timezone.now()).strftime('%H:%M:%S')
+        context['can_start_work'] = True  # 常に出勤を開始できるようにする
 
         return context
+
 
 
 
