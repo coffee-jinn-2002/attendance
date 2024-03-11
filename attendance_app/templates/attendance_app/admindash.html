@@ -25,29 +25,31 @@
 
 <!-- 同じ会社名のユーザー一覧 -->
 <table class="table">
-    <thead>
+  <thead>
       <tr>
-        <th>Username</th>
-        <th>Email</th>
-        <th>Role</th>
+          <th>Username</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Attendance</th>  <!-- 勤怠記録へのリンク用の列を追加 -->
       </tr>
-    </thead>
-    <tbody>
+  </thead>
+  <tbody>
       {% for other_user in users %}
       <tr>
-        <td>{{ other_user.username }}</td>
-        <td>{{ other_user.email }}</td>
-        <td>
-          {% if other_user.is_admin %}
-            Administrator
-          {% else %}
-            Regular User
-          {% endif %}
-        </td>
+          <td>{{ other_user.username }}</td>
+          <td>{{ other_user.email }}</td>
+          <td>
+              {% if other_user.is_admin %}
+                  Administrator
+              {% else %}
+                  Regular User
+              {% endif %}
+          </td>
+          <td><a href="{% url 'attendance_app:user_attendance' other_user.user_id %}">View Attendance</a></td>
       </tr>
       {% endfor %}
-    </tbody>
-  </table>
+  </tbody>
+</table>
 
 <form action="{% url 'attendance_app:logout' %}" method="post">
     {% csrf_token %}

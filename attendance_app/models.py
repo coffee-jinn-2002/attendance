@@ -66,6 +66,7 @@ class Workday(models.Model):
     start_time = models.DateTimeField(blank=True, null=True)
     end_time = models.DateTimeField(blank=True, null=True)
     total_work_time = models.DurationField(blank=True, null=True)
+    report = models.CharField(max_length=500, blank=True) 
 
     def __str__(self):
         return f"{self.user.username}'s workday on {self.date}"

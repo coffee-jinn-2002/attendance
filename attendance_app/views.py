@@ -118,6 +118,7 @@ class UserDashboardView(LoginRequiredMixin, TemplateView):
         # 現在のコードを修正して、既存のAttendanceがある場合はそれを更新するようにする
         user = self.request.user
         action = request.POST.get('action')
+        report = request.POST.get('report', '').strip()  # 日報のデータを取得
         workday = Workday.objects.filter(user=user).latest('id')
 
         if action == 'start':
@@ -157,8 +158,28 @@ class UserDashboardView(LoginRequiredMixin, TemplateView):
                 attendance.status = '退勤済み'
                 attendance.end_time = timezone.now()
                 attendance.save()
+
+                # Workday モデルを更新
+                workday.start_time = attendance.start_time
+                workday.end_time = attendance.end_time
+                workday.total_work_time = attendance.total_work_time
+                workday.report = report  # 日報を Workday オブジェクトに保存
+                workday.save()
             except Attendance.DoesNotExist:
                 # エラーハンドリングを追加するか、適切な処理を行う
                 pass
 
         return redirect('attendance_app:user_dashboard')
+
+class UserAttendanceView(LoginRequiredMixin, TemplateView):
+    template_name = 'attendance_app/user_attendance.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user_id = kwargs.get('user_id')  # URLからユーザーIDを取得
+        user = User.objects.get(pk=user_id)  # 該当するユーザーを取得
+        workdays = Workday.objects.filter(user=user).order_by('-date')  # ユーザーに関連する勤怠データを取得
+
+        context['user'] = user
+        context['workdays'] = workdays
+        return context

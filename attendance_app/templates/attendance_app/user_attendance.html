@@ -1,0 +1,29 @@
+{% extends 'attendance_app/base.html' %}
+
+{% block content %}
+<div class="container">
+    <h1>{{ user.username }}'s Attendance Record</h1>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th>Total Work Time</th>
+                <th>Report</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for workday in workdays %}
+            <tr>
+                <td>{{ workday.date }}</td>
+                <td>{{ workday.start_time }}</td>
+                <td>{{ workday.end_time }}</td>
+                <td>{{ workday.total_work_time }}</td>
+                <td>{{ workday.report }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

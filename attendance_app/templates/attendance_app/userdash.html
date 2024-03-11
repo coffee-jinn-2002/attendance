@@ -26,6 +26,7 @@
 <!-- 現在時刻を表示する要素 -->
 <div class="h2" id="current-date">{{ current_date }}</div>
 <div class="h1" id="current-time">{{ current_time }}</div>
+<div class="h2">現在のステータス: {{ attendance.status }}</div>
 
 <!-- JavaScriptを挿入 -->
 <script>
@@ -58,7 +59,6 @@ setInterval(updateCurrentTime, 1000);
 <form action="{% url 'attendance_app:user_dashboard' %}" method="post">
     {% csrf_token %}
     <button type="submit" name="action" value="break_start" class="btn btn-primary">休憩開始</button>
-    <button type="submit" name="action" value="end" class="btn btn-primary">退勤</button>
 </form>
 {% elif attendance.status == '休憩中' %}
 <form action="{% url 'attendance_app:user_dashboard' %}" method="post">
@@ -68,6 +68,34 @@ setInterval(updateCurrentTime, 1000);
 {% elif attendance.status == '退勤済み' %}
 <div class="h2">実働時間: {{ attendance.total_work_time }}</div>
 {% endif %}
+
+<!-- 日報フォームと退勤ボタンを同じフォームタグ内で管理 -->
+{% if attendance.status != '退勤済み' %}
+<form action="{% url 'attendance_app:user_dashboard' %}" method="post" id="workday-form">
+    {% csrf_token %}
+    <textarea name="report" id="report" rows="4" placeholder="日報を入力してください" required></textarea>
+
+    {% if attendance.status == '出勤中' %}
+    <button type="submit" onclick="submitForm()" name="action" value="end" class="btn btn-primary">退勤</button>
+    {% endif %}
+</form>
+{% endif %}
+
+<script>
+    function submitForm() {
+        var report = document.getElementById('report').value;
+        if (report.trim() === '') {
+            alert('日報を書いてから退勤ボタンを押してください。');
+            // ここでreturnを追加して、フォームの送信を防ぎます。
+            return false; // フォームの送信を停止
+        } else {
+            // フォームの送信処理
+            document.getElementById('workday-form').submit();
+        }
+    }
+</script>
+
+<!-- Logout -->
 <p></p>
 <form action="{% url 'attendance_app:logout' %}" method="post">
     {% csrf_token %}
