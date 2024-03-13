@@ -4,7 +4,8 @@
 {% if user.is_authenticated %}
 <div class="h1">MyPage</div>
 {% else %}
-<div class="h1">Main</div>
+<div class="h1">WorkChronicle</div>
+<p>バイトやインターン生の勤怠管理を日報と一緒に！</p>
 {% endif %}
 {% endblock %}
 
@@ -18,19 +19,41 @@
 {% if user.is_admin %}
 <!-- 管理者の場合の表示 -->
 <p>You are an administrator.</p>
-{% else %}
-<!-- 管理者でない場合の表示 -->
-<p>You are not an administrator.</p>
-{% endif %}
-
-<!-- ↓追加 -->
-<!-- <a href="{% url 'attendance_app:logout' %}" class="btn btn-primary">Logout</a>  -->
+<form action="{% url 'attendance_app:logout' %}" method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-primary">Logout</button>
+</form>
 <form action="{% url 'attendance_app:logout' %}" method="post">
     {% csrf_token %}
     <button type="submit" class="btn btn-primary">Logout</button>
 </form>
 {% else %}
-<a href="{% url 'attendance_app:signup' %}" class="btn btn-primary">Signup</a>
-<a href="{% url 'attendance_app:login' %}" class="btn btn-primary">Login</a>
+<!-- 管理者でない場合の表示 -->
+<h3>管理アカウントの作成ありがとうございます。<br>
+    HOSTが確認するので、利用できるまで今しばらくお待ちください。<br>
+    利用可能になりましたら、メールを送らせていただきます。
+</h3 >
+{% endif %}
+
+
+<form action="{% url 'attendance_app:logout' %}" method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-primary">Logout</button>
+</form>
+{% else %}
+<div>
+    <a href="{% url 'attendance_app:signup' %}" class="btn btn-primary">管理者アカウントを作成する</a>
+    <a href="{% url 'attendance_app:login' %}" class="btn btn-primary">Login</a>
+</div>
+<div class = "part1">
+    <i class="fa-solid fa-user fa-5x"></i>
+    <h4 class = "h bold">管理アカウントを作成</h4>
+    <p class = "h">管理アカウントを作成すると一旦HOSTが確認します。<br>確認後問題なかったら利用可能になりますので、<br>利用可能通知が行くまで少々お待ちください！</p>
+</div>
+<div class = "part1">
+    <i class="fa-regular fa-user fa-5x"></i>
+    <h4 class = "h bold">一般ユーザーはログインしてください</h4>
+    <p class = "h">組織の管理者からアカウントを発行されたら、<br>すでにログインできる状態にあるので<br>勤怠の打刻を開始してください。</p>
+</div>
 {% endif %}
 {% endblock %}

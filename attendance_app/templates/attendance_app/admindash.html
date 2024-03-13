@@ -2,7 +2,8 @@
 
 {% block title %}
 {% if user.is_authenticated %}
-<div class="h1">Admin Page</div>
+<div class="h1">管理者ページ</div>
+<p class = "h">ここでは管理下にあるユーザーの詳細や新しいユーザーの追加などができます</p>
 {% else %}
 <div class="h1">Main</div>
 {% endif %}
@@ -10,14 +11,6 @@
 
 {% block content %}
 {% if user.is_authenticated %}
-<div class="h2">Welcome {{ user.username }}</div>
-<div>
-    <p>{{user.organization_name}}</p>
-</div>
-
-<p>You are an administrator.</p>
-
-
 
 <a href="{% url 'attendance_app:create_user' %}" class="btn btn-primary">Create New User</a>
 
@@ -27,10 +20,10 @@
 <table class="table">
   <thead>
       <tr>
-          <th>Username</th>
-          <th>Email</th>
-          <th>Role</th>
-          <th>Attendance</th>  <!-- 勤怠記録へのリンク用の列を追加 -->
+          <th>ユーザーネーム</th>
+          <th>メールアドレス</th>
+          <th>権限</th>
+          <th>詳細</th> 
       </tr>
   </thead>
   <tbody>
@@ -40,23 +33,18 @@
           <td>{{ other_user.email }}</td>
           <td>
               {% if other_user.is_admin %}
-                  Administrator
+                  管理者
               {% else %}
-                  Regular User
+                  一般ユーザー
               {% endif %}
           </td>
-          <td><a href="{% url 'attendance_app:user_attendance' other_user.user_id %}">View Attendance</a></td>
+          <td><a href="{% url 'attendance_app:user_attendance' other_user.user_id %}" class="btn btn-info">詳細を見る</a></td>
       </tr>
       {% endfor %}
   </tbody>
 </table>
 
-<form action="{% url 'attendance_app:logout' %}" method="post">
-    {% csrf_token %}
-    <button type="submit" class="btn btn-primary">Logout</button>
-</form>
 {% else %}
-<a href="{% url 'attendance_app:signup' %}" class="btn btn-primary">Signup</a>
-<a href="{% url 'attendance_app:login' %}" class="btn btn-primary">Login</a>
+
 {% endif %}
 {% endblock %}

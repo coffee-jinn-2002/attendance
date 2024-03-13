@@ -2,7 +2,7 @@
 
 {% block title %}
 {% if user.is_authenticated %}
-<div class="h1">User Page</div>
+<div class="h1">勤怠登録ページ</div>
 {% else %}
 <div class="h1">Main</div>
 {% endif %}
@@ -10,23 +10,16 @@
 
 {% block content %}
 {% if user.is_authenticated %}
-<div class="h2">Welcome {{ user.username }}</div>
-<div>
-    <p>{{ user.organization_name }}</p>
-</div>
 
 {% if user.is_admin %}
 <!-- 管理者の場合の表示 -->
-<p>You are an administrator.</p>
-{% else %}
-<!-- 管理者でない場合の表示 -->
-<p>You are not an administrator.</p>
+<p>※管理アカウントでログインしています</p>
 {% endif %}
 
 <!-- 現在時刻を表示する要素 -->
-<div class="h2" id="current-date">{{ current_date }}</div>
-<div class="h1" id="current-time">{{ current_time }}</div>
-<div class="h2">現在のステータス: {{ attendance.status }}</div>
+<div class="date" id="current-date">{{ current_date }}</div>
+<div class="time" id="current-time">{{ current_time }}</div>
+<div class="status">現在のステータス: {{ attendance.status }}</div>
 
 <!-- JavaScriptを挿入 -->
 <script>
@@ -53,30 +46,31 @@ setInterval(updateCurrentTime, 1000);
 {% if attendance.status == '出勤前' %}
 <form action="{% url 'attendance_app:user_dashboard' %}" method="post">
     {% csrf_token %}
-    <button type="submit" name="action" value="start" class="btn btn-primary">出勤</button>
+    <button type="submit" name="action" value="start" class="btn btn-primary custom-button">出勤</button>
 </form>
 {% elif attendance.status == '出勤中' %}
 <form action="{% url 'attendance_app:user_dashboard' %}" method="post">
     {% csrf_token %}
-    <button type="submit" name="action" value="break_start" class="btn btn-primary">休憩開始</button>
+    <button type="submit" name="action" value="break_start" class="btn btn-primary custom-button">休憩開始</button>
 </form>
 {% elif attendance.status == '休憩中' %}
 <form action="{% url 'attendance_app:user_dashboard' %}" method="post">
     {% csrf_token %}
-    <button type="submit" name="action" value="break_end" class="btn btn-primary">休憩終了</button>
+    <button type="submit" name="action" value="break_end" class="btn btn-primary custom-button">休憩終了</button>
 </form>
 {% elif attendance.status == '退勤済み' %}
-<div class="h2">実働時間: {{ attendance.total_work_time }}</div>
+<div class="total_work">実働時間: {{ formatted_duration }}</div>
+<!-- <div class="total_work">実働時間: {{ attendance.total_work_time }}</div> -->
 {% endif %}
 
 <!-- 日報フォームと退勤ボタンを同じフォームタグ内で管理 -->
 {% if attendance.status != '退勤済み' %}
 <form action="{% url 'attendance_app:user_dashboard' %}" method="post" id="workday-form">
     {% csrf_token %}
-    <textarea name="report" id="report" rows="4" placeholder="日報を入力してください" required></textarea>
+    <textarea name="report" id="report" rows="4" class="form-control custom-textarea" placeholder="日報を入力してください(500文字まで)" required></textarea>
 
     {% if attendance.status == '出勤中' %}
-    <button type="submit" onclick="submitForm()" name="action" value="end" class="btn btn-primary">退勤</button>
+    <button type="submit" onclick="submitForm()" name="action" value="end" class="btn btn-primary custom-button">退勤</button>
     {% endif %}
 </form>
 {% endif %}
@@ -86,21 +80,12 @@ setInterval(updateCurrentTime, 1000);
         var report = document.getElementById('report').value;
         if (report.trim() === '') {
             alert('日報を書いてから退勤ボタンを押してください。');
-            // ここでreturnを追加して、フォームの送信を防ぎます。
-            return false; // フォームの送信を停止
+            return false; 
         } else {
-            // フォームの送信処理
             document.getElementById('workday-form').submit();
         }
     }
 </script>
-
-<!-- Logout -->
-<p></p>
-<form action="{% url 'attendance_app:logout' %}" method="post">
-    {% csrf_token %}
-    <button type="submit" class="btn btn-primary">Logout</button>
-</form>
 
 
 

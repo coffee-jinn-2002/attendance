@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="container">
-    <h1>{{ user.username }}'s Attendance Record</h1>
+    <h1>{{ user.username }}'s 詳細ページ</h1>
     <table class="table">
         <thead>
             <tr>
@@ -25,5 +25,7 @@
             {% endfor %}
         </tbody>
     </table>
+    <a href="{% url 'attendance_app:admin_dashboard' %}" class="btn btn-secondary">管理者ダッシュボードに戻る</a>
+
 </div>
 {% endblock %}

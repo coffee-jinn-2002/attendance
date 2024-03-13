@@ -105,9 +105,23 @@ class UserDashboardView(LoginRequiredMixin, TemplateView):
             defaults={'status': '出勤前', 'start_time': None, 'end_time': None}
         )
 
+        context['can_start_work'] = True 
+
+        # 時間をフォーマットに直す
+        if attendance.total_work_time:
+            total_seconds = attendance.total_work_time.total_seconds()
+            hours = int(total_seconds // 3600)
+            minutes = int((total_seconds % 3600) // 60)
+            seconds = int(total_seconds % 60)
+            formatted_duration = f"{hours}時間{minutes}分{seconds}秒"
+        else:
+            formatted_duration = "0時間0分0秒"
+
         context['workday'] = workday
         context['attendance'] = attendance
-        context['can_start_work'] = True  # 常に出勤を開始できるようにする
+        context['formatted_duration'] = formatted_duration  # Add formatted duration to context
+
+
 
         return context
 
